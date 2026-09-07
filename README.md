@@ -30,12 +30,49 @@ Tipos usados neste repositório:
 Exemplos:
 
 ```
-feat(app): add capture and analyze button
-fix(server): handle incomplete TCP payload
-docs: add IP and port setup
+feat: adiciona tela inicial com ip, porta e resultado
+feat: adiciona envio da imagem via socket tcp
+docs: atualiza readme com fluxo do aplicativo
 ```
 
-## App (`app/`)
+## Como rodar o app (Flutter)
+
+1. Instale o [Flutter SDK](https://docs.flutter.dev/get-started/install/windows) e o Android Studio (SDK + aparelho ou emulador).
+2. Confira com `flutter doctor`.
+3. Na pasta `app/`:
+
+```powershell
+.\setup.ps1
+flutter pub get
+flutter run
+```
+
+O `setup.ps1` gera a pasta `android/` (se ainda não existir) e aplica:
+
+- permissões de **câmera**, **internet** e leitura da galeria
+- tráfego HTTP/TCP sem TLS (`usesCleartextTraffic` + `network_security_config`)
+
+### IP e porta
+
+| Onde | Padrão | Como mudar |
+| --- | --- | --- |
+| App | `192.168.0.10:5000` | campos **IP do servidor** e **Porta** na tela (ficam salvos no aparelho) |
+| Servidor | `0.0.0.0:5000` | quem for do backend altera em `server/config.py` |
+
+1. PC e celular na **mesma Wi-Fi**.
+2. No PC, `ipconfig` → IPv4 (ex.: `192.168.0.15`).
+3. No app, coloque esse IP e a porta `5000`.
+4. Libere a porta **5000 TCP** no Firewall do Windows.
+5. Emulador Android: use `10.0.2.2` no lugar do IP da máquina.
+
+### Fluxo da demo
+
+1. Informe IP e porta.
+2. Toque em **Tirar e Analisar** (ou **Escolher da galeria** no emulador).
+3. O app redimensiona a foto (largura máx. 1280, JPEG qualidade 80) e envia `4 bytes` (tamanho big-endian) + JPEG.
+4. A resposta vem no mesmo framing (`4 bytes` + JSON ou texto).
+5. A tela mostra *Pessoa detectada*, *Cadeira detectada*, etc., ou **Nada Detectado**.
+6. Outra foto substitui o resultado.
 
 Dependências em `pubspec.yaml`: `camera`, `image`, `image_picker`, `permission_handler`, `shared_preferences`.
 
@@ -44,22 +81,13 @@ app/lib/
 ├── main.dart
 └── src/
     ├── app.dart
-    ├── config.dart                 # IP/porta, 1280px, JPEG 80
-    ├── camera/image_prep.dart      # redimensionar + compactar
-    ├── protocol/tcp_client.dart    # dart:io Socket
+    ├── config.dart
+    ├── camera/image_prep.dart
+    ├── protocol/tcp_client.dart
     └── ui/
-        ├── home_page.dart          # Tirar e Analisar
+        ├── home_page.dart
         └── widgets/result_card.dart
 ```
-
-```powershell
-cd app
-.\setup.ps1
-flutter pub get
-flutter run
-```
-
-IP e porta: campos na tela (padrão em `config.dart`). Celular e PC na mesma Wi-Fi; em emulador use `10.0.2.2`.
 
 ## Servidor (`server/`)
 
