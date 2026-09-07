@@ -1,0 +1,8 @@
+services:
+  server:
+    build: ./server
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server/received:/app/received
+      - ./server/models:/app/models

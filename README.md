@@ -64,3 +64,9 @@ IP e porta: campos na tela (padrão em `config.dart`). Celular e PC na mesma Wi-
 ## Servidor (`server/`)
 
 Estrutura mínima para quem for implementar: `main.py`, `protocol.py`, `detector.py`, `config.py`. Dependências em `requirements.txt`.
+
+O servidor é o único serviço em container (`server/Dockerfile` + `docker-compose.yml`). O YOLO roda **dentro** desse processo, não em um container separado. O app Flutter **não** é container: a demo é no Android (aparelho ou emulador), falando TCP com o servidor.
+
+```bash
+docker compose up --build
+```
