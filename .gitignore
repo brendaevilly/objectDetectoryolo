@@ -12,6 +12,9 @@ server/models/*.onnx
 server/received/*
 !server/received/.gitkeep
 
+# IDE (caminho do usuario, SDK local)
+.idea/
+
 # Flutter
 app/.dart_tool/
 app/.flutter-plugins
@@ -20,11 +23,15 @@ app/.metadata
 app/build/
 app/.idea/
 app/android/.gradle/
+app/android/build/
 app/android/local.properties
 app/android/app/debug
 app/android/app/profile
 app/android/app/release
 *.iml
+*.jks
+*.keystore
+key.properties
 
 # Ambiente e SO
 .env
