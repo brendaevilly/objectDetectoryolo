@@ -4,6 +4,37 @@
 
 App Android em Flutter captura uma foto e envia o JPEG por socket TCP a um servidor Python com YOLO.
 
+- Padrão de commits: [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+
+## Conventional Commits
+
+Mensagens no formato:
+
+```
+<type>[optional scope]: <description>
+```
+
+Tipos usados neste repositório:
+
+| Tipo | Quando usar |
+| --- | --- |
+| `feat` | nova funcionalidade |
+| `fix` | correção de bug |
+| `docs` | só documentação |
+| `style` | formatação, sem mudança de lógica |
+| `refactor` | reorganização de código |
+| `test` | testes |
+| `chore` | tarefas de manutenção (deps, ignore, setup) |
+| `build` | build e empacotamento |
+
+Exemplos:
+
+```
+feat(app): add capture and analyze button
+fix(server): handle incomplete TCP payload
+docs: add IP and port setup
+```
+
 ## App (`app/`)
 
 Dependências em `pubspec.yaml`: `camera`, `image`, `image_picker`, `permission_handler`, `shared_preferences`.
