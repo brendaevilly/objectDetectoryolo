@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+
+# Pesos YOLO e imagens recebidas
+server/models/*.pt
+server/models/*.onnx
+server/received/*
+!server/received/.gitkeep
+
+# Flutter
+app/.dart_tool/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/.metadata
+app/build/
+app/.idea/
+app/android/.gradle/
+app/android/local.properties
+app/android/app/debug
+app/android/app/profile
+app/android/app/release
+*.iml
+
+# Ambiente e SO
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+*.log
