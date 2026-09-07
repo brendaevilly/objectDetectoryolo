@@ -1,9 +1,24 @@
 # Gera o projeto Android do Flutter e aplica permissões de câmera/rede.
 $ErrorActionPreference = "Stop"
 
-if (-not (Get-Command flutter -ErrorAction SilentlyContinue)) {
-    Write-Host "Flutter nao encontrado. Instale: https://docs.flutter.dev/get-started/install/windows"
+$flutterCandidates = @(
+    (Get-Command flutter -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source),
+    "$env:USERPROFILE\develop\flutter\bin\flutter.bat",
+    "$env:USERPROFILE\flutter\bin\flutter.bat",
+    "C:\src\flutter\bin\flutter.bat"
+) | Where-Object { $_ -and (Test-Path $_) }
+
+if (-not $flutterCandidates) {
+    Write-Host "Flutter nao encontrado neste terminal."
+    Write-Host "Feche e abra o terminal (o PATH so atualiza em sessao nova) ou rode:"
+    Write-Host '  $env:Path = "$env:USERPROFILE\develop\flutter\bin;" + $env:Path'
+    Write-Host "Instalacao: https://docs.flutter.dev/get-started/install/windows"
     exit 1
+}
+
+$flutter = $flutterCandidates[0]
+if ($flutter -like "*.bat") {
+    $env:Path = "$(Split-Path $flutter);" + $env:Path
 }
 
 Set-Location $PSScriptRoot
