@@ -18,6 +18,10 @@ if (-not (Test-Path $manifestPath)) {
     exit 1
 }
 
+$xmlDir = Join-Path $PSScriptRoot "android\app\src\main\res\xml"
+New-Item -ItemType Directory -Force -Path $xmlDir | Out-Null
+Copy-Item -Force (Join-Path $PSScriptRoot "tooling\network_security_config.xml") (Join-Path $xmlDir "network_security_config.xml")
+
 $manifest = Get-Content $manifestPath -Raw
 
 if ($manifest -notmatch "android.permission.CAMERA") {
@@ -25,6 +29,8 @@ if ($manifest -notmatch "android.permission.CAMERA") {
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
 "@
@@ -33,6 +39,10 @@ if ($manifest -notmatch "android.permission.CAMERA") {
 
 if ($manifest -notmatch "usesCleartextTraffic") {
     $manifest = $manifest -replace "<application", '<application android:usesCleartextTraffic="true"'
+}
+
+if ($manifest -notmatch "networkSecurityConfig") {
+    $manifest = $manifest -replace "<application", '<application android:networkSecurityConfig="@xml/network_security_config"'
 }
 
 Set-Content -Path $manifestPath -Value $manifest -NoNewline
