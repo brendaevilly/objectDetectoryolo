@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "br.ufpi.sd.object_detector_yolo"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

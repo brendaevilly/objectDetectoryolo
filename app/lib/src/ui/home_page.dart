@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:camera/camera.dart';
@@ -123,13 +124,35 @@ class _HomePageState extends State<HomePage> {
             : [result.message];
       });
     } catch (e) {
-      setState(() {
-        _error =
-            'Não foi possível analisar. Verifique IP/porta e se o servidor está ligado.\n$e';
-      });
+      setState(() => _error = _describeError(e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  /// Traduz erros de conexao para orientacoes acionaveis na demonstracao.
+  String _describeError(Object e) {
+    if (e is SocketException) {
+      final code = e.osError?.errorCode;
+      // Timeout (Linux/Android: 110) ou resposta acima de responseTimeout (30s)
+      if (code == 110 || e.message.contains('timed out')) {
+        return 'Servidor não respondeu a tempo (timeout).\n'
+            '1. Confira se o servidor está ligado (docker compose up -d).\n'
+            '2. Confira se o IP é o IPv4 do PC do servidor (ipconfig / ip addr).\n'
+            '3. Celular e PC precisam estar na mesma Wi-Fi, sem VPN.';
+      }
+      // Conexao recusada (Linux/Android: 111): ninguem ouvindo na porta
+      if (code == 111 || e.message.contains('refused')) {
+        return 'Conexão recusada: nada ouvindo nesse IP/porta.\n'
+            'Suba o servidor (docker compose up -d) e confira a porta 5000.';
+      }
+      // Rede inacessivel (Linux/Android: 113): rota ate o IP nao existe
+      if (code == 113 || e.message.contains('unreachable')) {
+        return 'Rede inacessível: não há rota até esse IP.\n'
+            'Conecte o celular na mesma Wi-Fi do servidor e revise o IP.';
+      }
+    }
+    return 'Não foi possível analisar. Verifique IP/porta e se o servidor está ligado.\n$e';
   }
 
   Future<void> _onAnalyzePressed() async {
