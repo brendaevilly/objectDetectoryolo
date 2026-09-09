@@ -1,6 +1,7 @@
 import json
 import os
 import socket
+import threading
 from datetime import datetime
 
 from config import HOST, PORT, MODEL_NAME
@@ -26,16 +27,19 @@ def build_response(labels: list[str]) -> bytes:
         payload = {"detected": False, "labels": [], "message": "Nada Detectado"}
     return json.dumps(payload, ensure_ascii=False).encode("utf-8")
 
-def handle_connection(conn: socket.socket, addr, detector: ObjectDetector) -> None:
+def handle_connection(conn: socket.socket, addr, detector: ObjectDetector, infer_lock: threading.Lock) -> None:
     print(f"[INFO] Conexão recebida de {addr}")
     try:
         jpeg_bytes = recv_message(conn)
         save_image(jpeg_bytes)
- 
+
         image = detector.decode_jpeg(jpeg_bytes)
-        labels = detector.detect(image)
+        # A inferência é serializada por um lock: o YOLO não é thread-safe e as
+        # conexões (I/O de rede) acontecem em paralelo, só a detecção enfileira.
+        with infer_lock:
+            labels = detector.detect(image)
         print(f"[INFO] Objetos detectados: {labels}")
- 
+
         response = build_response(labels)
         send_message(conn, response)
     except Exception as error:
@@ -52,13 +56,19 @@ def main() -> None:
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
         server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server.bind((HOST, PORT))
-        server.listen(1)
+        server.listen(10)
         print(f"[INFO] Servidor ouvindo em {HOST}:{PORT}")
         print("[INFO] Aguardando imagem...")
- 
+
+        infer_lock = threading.Lock()
         while True:
             conn, addr = server.accept()
-            handle_connection(conn, addr, detector)
+            # Uma thread por conexão: vários celulares podem enviar ao mesmo tempo.
+            threading.Thread(
+                target=handle_connection,
+                args=(conn, addr, detector, infer_lock),
+                daemon=True,
+            ).start()
             print("[INFO] Aguardando imagem...")
 
 
